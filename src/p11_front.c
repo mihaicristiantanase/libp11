@@ -477,4 +477,38 @@ int PKCS11_verify(int type, const unsigned char *m, unsigned int m_len,
 	return -1;
 }
 
+unsigned char* PKCS11_get_slot_attr(PKCS11_SLOT* slot, void* tmpl, unsigned long type)
+{
+	int rv;
+	CK_SESSION_HANDLE session;
+	PKCS11_SLOT_private* spriv = PRIVSLOT(slot);
+	PKCS11_CTX_private* ctx = spriv->ctx;
+	CK_OBJECT_HANDLE* objs = NULL;
+	unsigned int nobjs = 0;
+
+	if (PKCS11_open_session(slot, 0)) {
+		return NULL;
+	}
+	if (pkcs11_get_session(spriv, 0, &session)) {
+		return NULL;
+	}
+
+	rv = pkcs11_handles_from_template(spriv, (PKCS11_TEMPLATE*)tmpl, &objs, &nobjs);
+	if (rv != 0) {
+		return NULL;
+	}
+
+	for (int i = 0; i < nobjs; i++) {
+		CK_BYTE* val = NULL;
+		size_t len = 0;
+		rv = pkcs11_getattr_alloc(ctx, session, objs[i], type, &val, &len);
+		if (rv == 0) {
+			/* stop at the first attribute and return it */
+			return val;
+		}
+	}
+	/* the attribute was not found */
+	return NULL;
+}
+
 /* vim: set noexpandtab: */

@@ -227,6 +227,11 @@ PKCS11_SLOT *PKCS11_find_next_token(PKCS11_CTX * ctx,
 			PKCS11_SLOT *slots, unsigned int nslots,
 		   	PKCS11_SLOT *slot);
 
+/* TODO(mihai): use a better name */
+extern unsigned char* PKCS11_get_slot_attr(PKCS11_SLOT *slot,
+	void* tmpl,
+	unsigned long type);
+
 /**
  * Check if user is already authenticated to a card
  *
@@ -520,6 +525,7 @@ extern int PKCS11_private_decrypt(
 # define CKR_F_PKCS11_GENERATE_KEY                        130
 # define CKR_F_PKCS11_RELOAD_CERTIFICATE                  131
 # define CKR_F_PKCS11_GET_SESSION                         132
+# define CKR_F_PKCS11_FIND_HANDLES                        133
 
 /* Backward compatibility of error function codes */
 #define PKCS11_F_PKCS11_CHANGE_PIN CKR_F_PKCS11_CHANGE_PIN

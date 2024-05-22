@@ -255,6 +255,9 @@ extern PKCS11_OBJECT_private *pkcs11_object_from_handle(PKCS11_SLOT_private *slo
 extern PKCS11_OBJECT_private *pkcs11_object_from_template(PKCS11_SLOT_private *slot,
 	CK_SESSION_HANDLE session, PKCS11_TEMPLATE *tmpl);
 
+extern int pkcs11_handles_from_template(PKCS11_SLOT_private* slot, PKCS11_TEMPLATE* tmpl,
+	CK_OBJECT_HANDLE** handlesp, unsigned int* countp);
+
 /* Get the corresponding object (same ID, given different object type) */
 extern PKCS11_OBJECT_private *pkcs11_object_from_object(PKCS11_OBJECT_private *obj,
 	CK_SESSION_HANDLE session, CK_OBJECT_CLASS object_class);

@@ -61,6 +61,53 @@ static CK_OBJECT_HANDLE pkcs11_handle_from_template(PKCS11_SLOT_private *slot,
 	return CK_INVALID_HANDLE;
 }
 
+/* Helper to acquire all object handles from given template */
+int pkcs11_handles_from_template(PKCS11_SLOT_private* slot, PKCS11_TEMPLATE* tmpl,
+	CK_OBJECT_HANDLE** handlesp, unsigned int* countp)
+{
+	CK_SESSION_HANDLE session;
+	CK_RV rv;
+	CK_OBJECT_HANDLE lst[256];
+	unsigned int lstsize = 0;
+
+	PKCS11_CTX_private* ctx = slot->ctx;
+
+	if (pkcs11_get_session(slot, 0, &session)) {
+		return -1;
+	}
+
+	rv = CRYPTOKI_call(ctx, C_FindObjectsInit(session, tmpl->attrs, tmpl->nattr));
+	CRYPTOKI_checkerr(CKR_F_PKCS11_FIND_HANDLES, rv);
+	do {
+		CK_OBJECT_HANDLE object;
+		CK_ULONG count;
+		rv = CRYPTOKI_call(ctx, C_FindObjects(session, &object, 1, &count));
+		CRYPTOKI_checkerr(CKR_F_PKCS11_FIND_HANDLES, rv);
+		if (count == 0) {
+			break;
+		}
+		lst[lstsize++] = object;
+	} while (rv == CKR_OK);
+	rv = CRYPTOKI_call(ctx, C_FindObjectsFinal(session));
+	CRYPTOKI_checkerr(CKR_F_PKCS11_FIND_HANDLES, rv);
+
+	pkcs11_zap_attrs(tmpl);
+
+	if (handlesp && lstsize > 0) {
+		size_t size = lstsize * sizeof(CK_OBJECT_HANDLE);
+		*handlesp = OPENSSL_malloc(size);
+		if (!*handlesp) {
+			return -1;
+		}
+		memcpy(*handlesp, lst, size);
+	}
+	if (countp) {
+		*countp = lstsize;
+	}
+
+	return 0;
+}
+
 /* Get object from a handle */
 PKCS11_OBJECT_private *pkcs11_object_from_handle(PKCS11_SLOT_private *slot,
 		CK_SESSION_HANDLE session, CK_OBJECT_HANDLE object)
