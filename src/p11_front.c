@@ -479,7 +479,9 @@ int PKCS11_verify(int type, const unsigned char *m, unsigned int m_len,
 
 unsigned char* PKCS11_get_slot_attr(PKCS11_SLOT* slot, void* tmpl, unsigned long type)
 {
-	int rv;
+	CK_BYTE* rv = NULL;
+
+	int rc;
 	CK_SESSION_HANDLE session;
 	PKCS11_SLOT_private* spriv = PRIVSLOT(slot);
 	PKCS11_CTX_private* ctx = spriv->ctx;
@@ -493,22 +495,25 @@ unsigned char* PKCS11_get_slot_attr(PKCS11_SLOT* slot, void* tmpl, unsigned long
 		return NULL;
 	}
 
-	rv = pkcs11_handles_from_template(spriv, (PKCS11_TEMPLATE*)tmpl, &objs, &nobjs);
-	if (rv != 0) {
-		return NULL;
+	rc = pkcs11_handles_from_template(spriv, (PKCS11_TEMPLATE*)tmpl, &objs, &nobjs);
+	if (rc != 0) {
+		goto cleanup;
 	}
 
 	for (int i = 0; i < nobjs; i++) {
-		CK_BYTE* val = NULL;
 		size_t len = 0;
-		rv = pkcs11_getattr_alloc(ctx, session, objs[i], type, &val, &len);
-		if (rv == 0) {
+		rc = pkcs11_getattr_alloc(ctx, session, objs[i], type, &rv, &len);
+		if (rc == 0) {
 			/* stop at the first attribute and return it */
-			return val;
+			goto cleanup;
 		}
 	}
-	/* the attribute was not found */
-	return NULL;
+
+	/* reaching this place means the attribute was not found */
+
+cleanup:
+	OPENSSL_free(objs);
+	return rv;
 }
 
 /* vim: set noexpandtab: */
