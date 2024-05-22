@@ -41,7 +41,7 @@ unsigned char* get_label_of_some_public_key(PKCS11_SLOT *slot)
 	PKCS11_TEMPLATE tmpl = {0};
 	CK_OBJECT_CLASS object_class = CKO_PUBLIC_KEY;
 	pkcs11_addattr_var(&tmpl, CKA_CLASS, object_class);
-	return PKCS11_get_slot_attr(slot, &tmpl, CKA_LABEL);
+	return PKCS11_get_slot_attr_s(slot, &tmpl, CKA_LABEL);
 }
 
 int main(int argc, char *argv[])

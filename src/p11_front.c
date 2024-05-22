@@ -477,7 +477,7 @@ int PKCS11_verify(int type, const unsigned char *m, unsigned int m_len,
 	return -1;
 }
 
-unsigned char* PKCS11_get_slot_attr(PKCS11_SLOT* slot, void* tmpl, unsigned long type)
+unsigned char* PKCS11_get_slot_attr_s(PKCS11_SLOT* slot, void* tmpl, unsigned long type)
 {
 	CK_BYTE* rv = NULL;
 
