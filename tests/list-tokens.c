@@ -31,9 +31,18 @@
  *
  */
 
+#include "libp11-int.h"
 #include <libp11.h>
 
 static void error_queue(const char *name);
+
+unsigned char* get_label_of_some_public_key(PKCS11_SLOT *slot)
+{
+	PKCS11_TEMPLATE tmpl = {0};
+	CK_OBJECT_CLASS object_class = CKO_PUBLIC_KEY;
+	pkcs11_addattr_var(&tmpl, CKA_CLASS, object_class);
+	return PKCS11_get_slot_attr(slot, &tmpl, CKA_LABEL);
+}
 
 int main(int argc, char *argv[])
 {
@@ -84,6 +93,11 @@ int main(int argc, char *argv[])
 		printf("Slot token manufacturer: %s\n", slot->token->manufacturer);
 		printf("Slot token model.......: %s\n", slot->token->model);
 		printf("Slot token serialnr....: %s\n", slot->token->serialnr);
+
+		unsigned char *label_of_some_public_key = get_label_of_some_public_key(slot);
+		error_queue("get_label_of_some_public_key");
+		printf("Label of some pubkey...: %s\n", label_of_some_public_key);
+		OPENSSL_free(label_of_some_public_key);
 	}
 	if (!token_found) {
 		error_queue("PKCS11_find_token");
