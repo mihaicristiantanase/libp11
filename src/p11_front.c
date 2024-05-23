@@ -488,9 +488,6 @@ unsigned char* PKCS11_get_slot_attr_s(PKCS11_SLOT* slot, void* tmpl, unsigned lo
 	CK_OBJECT_HANDLE* objs = NULL;
 	unsigned int nobjs = 0;
 
-	if (PKCS11_open_session(slot, 0)) {
-		return NULL;
-	}
 	if (pkcs11_get_session(spriv, 0, &session)) {
 		return NULL;
 	}
