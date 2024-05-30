@@ -18,7 +18,8 @@ check_PROGRAMS = \
 	rsa-oaep \
 	check-privkey \
 	store-cert \
-	dup-key
+	dup-key \
+	gen-rsa-key-pair
 dist_check_SCRIPTS = \
 	rsa-testpkcs11.softhsm \
 	rsa-testfork.softhsm \

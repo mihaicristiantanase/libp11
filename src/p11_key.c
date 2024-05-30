@@ -329,6 +329,15 @@ int pkcs11_generate_key(PKCS11_SLOT_private *slot, int algorithm, unsigned int b
 
 	(void)algorithm; /* squash the unused parameter warning */
 
+	// check if the key size is supported
+	CK_MECHANISM_INFO mechanismInfo;
+	rv = CRYPTOKI_call(ctx,
+		C_GetMechanismInfo(slot->id, mechanism.mechanism, &mechanismInfo));
+	CRYPTOKI_checkerr(CKR_F_PKCS11_GENERATE_KEY, rv);
+	if (mechanismInfo.ulMinKeySize > bits || bits > mechanismInfo.ulMaxKeySize) {
+		CRYPTOKI_checkerr(CKR_F_PKCS11_GENERATE_KEY, CKR_KEY_SIZE_RANGE);
+	}
+
 	if (pkcs11_get_session(slot, 1, &session))
 		return -1;
 
