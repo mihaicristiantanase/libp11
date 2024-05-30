@@ -225,6 +225,9 @@ PKCS11_SLOT *PKCS11_find_next_token(PKCS11_CTX * ctx,
 			PKCS11_SLOT *slots, unsigned int nslots,
 		   	PKCS11_SLOT *slot);
 
+/**
+ * Return a an string attribute given a template and an attribute type
+ */
 extern unsigned char* PKCS11_get_slot_attr_s(PKCS11_SLOT *slot,
 	void* tmpl,
 	unsigned long type);
