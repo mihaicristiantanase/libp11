@@ -104,7 +104,6 @@ int main(int argc, char *argv[])
 	PKCS11_CTX_unload(ctx);
 	PKCS11_CTX_free(ctx);
 
-	printf("Cleanup complete\n");
 	return 0;
 
 notoken:
