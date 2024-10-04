@@ -132,7 +132,7 @@ void testKeyGen(int algo, int size, PKCS11_SLOT* slot) {
 	unsigned char id[32] = {0};
 
 	char testname[256] = {0};
-	sprintf(testname, "PKCS11_generate_key algo:%d size:%d", algo, size);
+	sprintf(testname, "* PKCS11_generate_key algo:%d size:%d", algo, size);
 
 	sprintf(label, "test-key-%d-%d", algo, size);
 	sprintf(id, "id-test-key-%d-%d", algo, size);
