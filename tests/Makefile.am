@@ -19,7 +19,7 @@ check_PROGRAMS = \
 	check-privkey \
 	store-cert \
 	dup-key \
-	gen-rsa-key-pair
+	gen-key-pair
 dist_check_SCRIPTS = \
 	rsa-testpkcs11.softhsm \
 	rsa-testfork.softhsm \
