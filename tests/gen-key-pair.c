@@ -35,6 +35,7 @@
 #include <libp11.h>
 
 static void error_queue(const char *name);
+static void testKeyGen(int algo, int size, PKCS11_SLOT* slot);
 
 int main(int argc, char *argv[])
 {
@@ -91,30 +92,13 @@ int main(int argc, char *argv[])
 	rc = PKCS11_login(slot, 0, argv[2]);
 	error_queue("PKCS11_login");
 
-	// generate some keys
-	rc = PKCS11_generate_key(slot->token, 0, 128, "test-key-128",
-		(unsigned char*)"asdf-128", 9);
-	error_queue("PKCS11_generate_key 128");
-
-	rc = PKCS11_generate_key(slot->token, 0, 8192, "test-key-8192",
-		(unsigned char*)"asdf-8192", 10);
-	error_queue("PKCS11_generate_key 8192");
-
-	rc = PKCS11_generate_key(slot->token, 0, 3000, "test-key-3000",
-		(unsigned char*)"asdf-3000", 10);
-	error_queue("PKCS11_generate_key 3000");
-
-	rc = PKCS11_generate_key(slot->token, 0, 3000, "test-key-3000",
-		(unsigned char*)"asdf-3000", 10);
-	error_queue("PKCS11_generate_key 3000");
-
-	rc = PKCS11_generate_key(slot->token, 0, 2048, "test-key-2048",
-		(unsigned char*)"asdf-2048", 10);
-	error_queue("PKCS11_generate_key 2048");
-
-	rc = PKCS11_generate_key(slot->token, 0, 1024, "test-key-1024",
-		(unsigned char*)"asdf-1024", 10);
-	error_queue("PKCS11_generate_key 1024");
+	// generate some keys using RSA (implicit)
+	testKeyGen(0, 128, slot);
+	testKeyGen(0, 8192, slot);
+	testKeyGen(0, 3000, slot);
+	testKeyGen(0, 3000, slot);
+	testKeyGen(0, 2048, slot);
+	testKeyGen(0, 1024, slot);
 
 	PKCS11_release_all_slots(ctx, slots, nslots);
 	PKCS11_CTX_unload(ctx);
@@ -141,6 +125,23 @@ static void error_queue(const char *name)
 	if (ERR_peek_last_error()) {
 		fprintf(stderr, "%s generated errors:\n", name);
 		ERR_print_errors_fp(stderr);
+	}
+}
+
+void testKeyGen(int algo, int size, PKCS11_SLOT* slot) {
+	char label[32] = {0};
+	unsigned char id[32] = {0};
+
+	char testname[256] = {0};
+	sprintf(testname, "PKCS11_generate_key algo:%d size:%d", algo, size);
+
+	sprintf(label, "test-key-%d-%d", algo, size);
+	sprintf(id, "id-test-key-%d-%d", algo, size);
+	int rc = PKCS11_generate_key(slot->token, algo, size, label, id, strlen(id));
+	if (rc == 0) {
+		printf("%s ···→ Success.\n", testname);
+	} else {
+		error_queue(testname);
 	}
 }
 
