@@ -317,6 +317,13 @@ int pkcs11_reload_object(PKCS11_OBJECT_private *obj)
  */
 int pkcs11_generate_key(PKCS11_SLOT_private *slot, int algorithm, unsigned int bits,
 		char *label, unsigned char* id, size_t id_len) {
+	CK_ULONG num_bits = bits;
+	CK_BYTE rsa_public_exponent[] = {1, 0, 1};
+	// for ECDSA of 256 bits use prime256v1
+	CK_BYTE ecparams_256b[] = {0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07};
+	// for ECDSA of 384 bits use prime384v1
+	CK_BYTE ecparams_384b[] = {0x06, 0x05, 0x2B, 0x81, 0x04, 0x00, 0x22};
+
 	if (algorithm == 0) {
 		algorithm = CKM_RSA_PKCS_KEY_PAIR_GEN;
 	}
@@ -351,27 +358,18 @@ int pkcs11_generate_key(PKCS11_SLOT_private *slot, int algorithm, unsigned int b
 	pkcs11_addattr_bool(&pubtmpl, CKA_VERIFY, TRUE);
 	pkcs11_addattr_bool(&pubtmpl, CKA_WRAP, TRUE);
 	switch (algorithm) {
-	case CKM_RSA_PKCS_KEY_PAIR_GEN: {
-		CK_BYTE public_exponent[] = {1, 0, 1};
-		CK_ULONG num_bits = bits;
+	case CKM_RSA_PKCS_KEY_PAIR_GEN:
 		pkcs11_addattr_var(&pubtmpl, CKA_MODULUS_BITS, num_bits);
-		pkcs11_addattr(&pubtmpl, CKA_PUBLIC_EXPONENT, public_exponent, sizeof(public_exponent));
+		pkcs11_addattr(&pubtmpl, CKA_PUBLIC_EXPONENT, rsa_public_exponent, sizeof(rsa_public_exponent));
 		break;
-	}
 	case CKM_ECDSA_KEY_PAIR_GEN: {
 		switch (bits) {
-		case 256: {
-			// use prime256v1
-			CK_BYTE ecparams[] = {0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07};
-			pkcs11_addattr(&pubtmpl, CKA_EC_PARAMS, &ecparams, sizeof(ecparams));
+		case 256:
+			pkcs11_addattr(&pubtmpl, CKA_EC_PARAMS, &ecparams_256b, sizeof(ecparams_256b));
 			break;
-		}
-		case 384: {
-			// use prime384v1
-			CK_BYTE ecparams[] = {0x06, 0x05, 0x2B, 0x81, 0x04, 0x00, 0x22};
-			pkcs11_addattr(&pubtmpl, CKA_EC_PARAMS, &ecparams, sizeof(ecparams));
+		case 384:
+			pkcs11_addattr(&pubtmpl, CKA_EC_PARAMS, &ecparams_384b, sizeof(ecparams_384b));
 			break;
-		}
 		}
 		break;
 	}
