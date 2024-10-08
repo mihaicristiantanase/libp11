@@ -437,7 +437,7 @@ extern void ERR_load_PKCS11_strings(void);
  * Generate a private key on the token
  *
  * @param token token returned by PKCS11_find_token()
- * @param algorithm
+ * @param algorithm key pair generation algorithm (ie, mechanism)
  * @param bits size of the modulus in bits
  * @param label label for this key
  * @param id bytes to use as the id value
