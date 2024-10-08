@@ -100,6 +100,17 @@ int main(int argc, char *argv[])
 	testKeyGen(0, 2048, slot);
 	testKeyGen(0, 1024, slot);
 
+	// generate some keys using RSA (explicit)
+	testKeyGen(CKM_RSA_PKCS_KEY_PAIR_GEN, 128, slot);
+	testKeyGen(CKM_RSA_PKCS_KEY_PAIR_GEN, 2048, slot);
+	testKeyGen(CKM_RSA_PKCS_KEY_PAIR_GEN, 8192, slot);
+
+	// generate some keys using EC
+	testKeyGen(CKM_ECDSA_KEY_PAIR_GEN, 12, slot);
+	testKeyGen(CKM_ECDSA_KEY_PAIR_GEN, 256, slot);
+	testKeyGen(CKM_ECDSA_KEY_PAIR_GEN, 384, slot);
+	testKeyGen(CKM_ECDSA_KEY_PAIR_GEN, 1024, slot);
+
 	PKCS11_release_all_slots(ctx, slots, nslots);
 	PKCS11_CTX_unload(ctx);
 	PKCS11_CTX_free(ctx);
@@ -132,10 +143,10 @@ void testKeyGen(int algo, int size, PKCS11_SLOT* slot) {
 	unsigned char id[32] = {0};
 
 	char testname[256] = {0};
-	sprintf(testname, "* PKCS11_generate_key algo:%d size:%d", algo, size);
+	sprintf(testname, "* PKCS11_generate_key algo:0x%x size:%d", algo, size);
 
-	sprintf(label, "test-key-%d-%d", algo, size);
-	sprintf(id, "id-test-key-%d-%d", algo, size);
+	sprintf(label, "test-key-0x%x-%d", algo, size);
+	sprintf(id, "id-test-key-0x%x-%d", algo, size);
 	int rc = PKCS11_generate_key(slot->token, algo, size, label, id, strlen(id));
 	if (rc == 0) {
 		printf("%s ···→ Success.\n", testname);
