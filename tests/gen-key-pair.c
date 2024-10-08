@@ -149,7 +149,7 @@ void testKeyGen(int algo, int size, PKCS11_SLOT* slot) {
 	sprintf(id, "id-test-key-0x%x-%d", algo, size);
 	int rc = PKCS11_generate_key(slot->token, algo, size, label, id, strlen(id));
 	if (rc == 0) {
-		printf("%s ···→ Success.\n", testname);
+		printf("%s ·········→ Success.\n", testname);
 	} else {
 		error_queue(testname);
 	}
