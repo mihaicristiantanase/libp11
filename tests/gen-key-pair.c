@@ -140,14 +140,16 @@ static void error_queue(const char *name)
 
 void testKeyGen(int algo, int size, PKCS11_SLOT* slot) {
 	char label[32] = {0};
+	char idStr[32] = {0};
 	unsigned char id[32] = {0};
 
 	char testname[256] = {0};
 	sprintf(testname, "* PKCS11_generate_key algo:0x%x size:%d", algo, size);
 
 	sprintf(label, "test-key-0x%x-%d", algo, size);
-	sprintf(id, "id-test-key-0x%x-%d", algo, size);
-	int rc = PKCS11_generate_key(slot->token, algo, size, label, id, strlen(id));
+	sprintf(idStr, "id-test-key-0x%x-%d", algo, size);
+	memcpy(id, idStr, sizeof(idStr));
+	int rc = PKCS11_generate_key(slot->token, algo, size, label, id, strlen(idStr));
 	if (rc == 0) {
 		printf("%s ·········→ Success.\n", testname);
 	} else {
