@@ -36,6 +36,7 @@
 
 static void error_queue(const char *name);
 static void testKeyGen(int algo, int size, PKCS11_SLOT* slot);
+static void testCustomAttributes(int algo, int size, PKCS11_SLOT* slot);
 
 int main(int argc, char *argv[])
 {
@@ -111,6 +112,9 @@ int main(int argc, char *argv[])
 	testKeyGen(CKM_ECDSA_KEY_PAIR_GEN, 384, slot);
 	testKeyGen(CKM_ECDSA_KEY_PAIR_GEN, 1024, slot);
 
+	// generate EC keys with custom attributes
+	testCustomAttributes(CKM_ECDSA_KEY_PAIR_GEN, 256, slot);
+
 	PKCS11_release_all_slots(ctx, slots, nslots);
 	PKCS11_CTX_unload(ctx);
 	PKCS11_CTX_free(ctx);
@@ -150,6 +154,33 @@ void testKeyGen(int algo, int size, PKCS11_SLOT* slot) {
 	sprintf(idStr, "id-test-key-0x%x-%d", algo, size);
 	memcpy(id, idStr, sizeof(idStr));
 	int rc = PKCS11_generate_key(slot->token, algo, size, label, id, strlen(idStr));
+	if (rc == 0) {
+		printf("%s ·········→ Success.\n", testname);
+	} else {
+		error_queue(testname);
+	}
+}
+
+void testCustomAttributes(int algo, int size, PKCS11_SLOT* slot) {
+	char label[32] = {0};
+	char idStr[32] = {0};
+	unsigned char id[32] = {0};
+
+	char testname[256] = {0};
+	sprintf(testname, "* PKCS11_generate_key algo:0x%x size:%d", algo, size);
+
+	sprintf(label, "test-key-custom-0x%x-%d", algo, size);
+	sprintf(idStr, "id-test-key-custom-0x%x-%d", algo, size);
+	memcpy(id, idStr, sizeof(idStr));
+
+	PKCS11_TEMPLATE pubtmpl = {0}, privtmpl = {0};
+	pkcs11_addattr_bool(&pubtmpl, CKA_WRAP, FALSE);
+	pkcs11_addattr_bool(&privtmpl, CKA_DECRYPT, FALSE);
+	pkcs11_addattr_bool(&privtmpl, CKA_DERIVE, TRUE);
+	pkcs11_addattr_bool(&privtmpl, CKA_UNWRAP, FALSE);
+
+	int rc = PKCS11_generate_key_with_attributes(slot->token, algo, size, label, id, strlen(idStr),
+		&pubtmpl, &privtmpl);
 	if (rc == 0) {
 		printf("%s ·········→ Success.\n", testname);
 	} else {
