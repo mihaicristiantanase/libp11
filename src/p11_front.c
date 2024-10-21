@@ -411,6 +411,18 @@ int PKCS11_generate_key(PKCS11_TOKEN *token,
 	return pkcs11_generate_key(slot, algorithm, bits, label, id, id_len);
 }
 
+int PKCS11_generate_key_with_attributes(PKCS11_TOKEN *token,
+		int algorithm, unsigned int bits,
+		char *label, unsigned char *id, size_t id_len,
+		void *inPubtmpl, void *inPrivtmpl)
+{
+	PKCS11_SLOT_private *slot = PRIVSLOT(token->slot);
+	if (check_slot_fork(slot) < 0)
+		return -1;
+	return pkcs11_generate_key_with_attributes(slot, algorithm, bits, label, id, id_len,
+		(CK_ATTRIBUTE_PTR)inPubtmpl, (CK_ATTRIBUTE_PTR)inPrivtmpl);
+}
+
 int PKCS11_get_key_size(PKCS11_KEY *pkey)
 {
 	PKCS11_OBJECT_private *key = PRIVKEY(pkey);

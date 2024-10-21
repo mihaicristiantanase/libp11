@@ -178,6 +178,7 @@ extern void pkcs11_addattr_s(PKCS11_TEMPLATE *, int, const char *);
 extern void pkcs11_addattr_bn(PKCS11_TEMPLATE *, int, const BIGNUM *);
 extern void pkcs11_addattr_obj(PKCS11_TEMPLATE *, int, pkcs11_i2d_fn, void *);
 extern void pkcs11_zap_attrs(PKCS11_TEMPLATE *);
+extern void pkcs11_addall(PKCS11_TEMPLATE *, PKCS11_TEMPLATE *);
 
 /* Internal implementation of current features */
 
@@ -325,6 +326,12 @@ extern int pkcs11_generate_random(PKCS11_SLOT_private *, unsigned char *r, unsig
 extern int pkcs11_generate_key(PKCS11_SLOT_private *tpriv,
 	int algorithm, unsigned int bits,
 	char *label, unsigned char* id, size_t id_len);
+
+/* Generate and store a private key on the token with custom key attributes */
+extern int pkcs11_generate_key_with_attributes(PKCS11_SLOT_private *tpriv,
+	int algorithm, unsigned int bits,
+	char *label, unsigned char* id, size_t id_len,
+	PKCS11_TEMPLATE *inPubtmpl, PKCS11_TEMPLATE *inPrivtmpl);
 
 /* Get the RSA key modulus size (in bytes) */
 extern int pkcs11_get_key_size(PKCS11_OBJECT_private *);

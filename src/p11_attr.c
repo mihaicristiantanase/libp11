@@ -174,4 +174,15 @@ void pkcs11_zap_attrs(PKCS11_TEMPLATE *tmpl)
 	tmpl->nattr = 0;
 }
 
+/**
+ * Add all attributes from the second template to the first
+ */
+void pkcs11_addall(PKCS11_TEMPLATE *tmpl, PKCS11_TEMPLATE *tmpl2) {
+	unsigned int i;
+	for (i = 0; i < tmpl2->nattr; ++i) {
+		CK_ATTRIBUTE_PTR attr = tmpl2->attrs + i;
+		pkcs11_addattr(tmpl, attr->type, attr->pValue, attr->ulValueLen);
+	}
+}
+
 /* vim: set noexpandtab: */

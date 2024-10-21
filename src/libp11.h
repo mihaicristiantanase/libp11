@@ -434,7 +434,7 @@ extern void ERR_load_PKCS11_strings(void);
  */
 
 /**
- * Generate a private key on the token
+ * Generate a private key on the token using some default key attributes.
  *
  * @param token token returned by PKCS11_find_token()
  * @param algorithm key pair generation algorithm (ie, mechanism)
@@ -448,6 +448,23 @@ extern void ERR_load_PKCS11_strings(void);
 extern int PKCS11_generate_key(PKCS11_TOKEN * token,
 	int algorithm, unsigned int bits,
 	char *label, unsigned char* id, size_t id_len);
+
+/**
+ *
+ * Generate a private key on the token using custom key attributes.
+ * @param token token returned by PKCS11_find_token()
+ * @param algorithm key pair generation algorithm (ie, mechanism)
+ * @param bits size of the modulus in bits
+ * @param label label for this key
+ * @param id bytes to use as the id value
+ * @param id_len length of the id value
+ * @retval 0 success
+ * @retval -1 error
+ */
+extern int PKCS11_generate_key_with_attributes(PKCS11_TOKEN * token,
+	int algorithm, unsigned int bits,
+	char *label, unsigned char* id, size_t id_len,
+	void *inPubtmpl, void *inPrivtmpl);
 
 /* Get the RSA key modulus size (in bytes) */
 extern int PKCS11_get_key_size(PKCS11_KEY *);

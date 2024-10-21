@@ -314,9 +314,25 @@ int pkcs11_reload_object(PKCS11_OBJECT_private *obj)
  * Generate a key pair directly on token.
  * If not algorithm is set (value 0) then CKM_RSA_PKCS_KEY_PAIR_GEN is
  * used.
+ * It uses the default private and public key attributes.
  */
 int pkcs11_generate_key(PKCS11_SLOT_private *slot, int algorithm, unsigned int bits,
 		char *label, unsigned char* id, size_t id_len) {
+	return pkcs11_generate_key_with_attributes(
+		slot, algorithm, bits, label, id, id_len, NULL, NULL);
+}
+
+/**
+ * Generate a key pair directly on token using the specified attributes.
+ * If not algorithm is set (value 0) then CKM_RSA_PKCS_KEY_PAIR_GEN is
+ * used.
+ * The key attributes can be NULL in which case the default values
+ * will be used.
+ */
+int pkcs11_generate_key_with_attributes(PKCS11_SLOT_private *slot, int algorithm, unsigned int bits,
+		char *label, unsigned char* id, size_t id_len,
+		PKCS11_TEMPLATE *inPubtmpl, PKCS11_TEMPLATE *inPrivtmpl) {
+	unsigned int i;
 	CK_ULONG num_bits = bits;
 	CK_BYTE rsa_public_exponent[] = {1, 0, 1};
 	// for ECDSA of 256 bits use prime256v1
@@ -354,9 +370,15 @@ int pkcs11_generate_key(PKCS11_SLOT_private *slot, int algorithm, unsigned int b
 	if (label)
 		pkcs11_addattr_s(&pubtmpl, CKA_LABEL, label);
 	pkcs11_addattr_bool(&pubtmpl, CKA_TOKEN, TRUE);
-	pkcs11_addattr_bool(&pubtmpl, CKA_ENCRYPT, TRUE);
-	pkcs11_addattr_bool(&pubtmpl, CKA_VERIFY, TRUE);
-	pkcs11_addattr_bool(&pubtmpl, CKA_WRAP, TRUE);
+	if (!inPubtmpl) {
+		// default attributes for the public key
+		pkcs11_addattr_bool(&pubtmpl, CKA_ENCRYPT, TRUE);
+		pkcs11_addattr_bool(&pubtmpl, CKA_VERIFY, TRUE);
+		pkcs11_addattr_bool(&pubtmpl, CKA_WRAP, TRUE);
+	} else {
+		// custom key attributes for the private key
+		pkcs11_addall(&pubtmpl, inPubtmpl);
+	}
 	switch (algorithm) {
 	case CKM_RSA_PKCS_KEY_PAIR_GEN:
 		pkcs11_addattr_var(&pubtmpl, CKA_MODULUS_BITS, num_bits);
@@ -381,10 +403,16 @@ int pkcs11_generate_key(PKCS11_SLOT_private *slot, int algorithm, unsigned int b
 		pkcs11_addattr_s(&privtmpl, CKA_LABEL, label);
 	pkcs11_addattr_bool(&privtmpl, CKA_TOKEN, TRUE);
 	pkcs11_addattr_bool(&privtmpl, CKA_PRIVATE, TRUE);
-	pkcs11_addattr_bool(&privtmpl, CKA_SENSITIVE, TRUE);
-	pkcs11_addattr_bool(&privtmpl, CKA_DECRYPT, TRUE);
-	pkcs11_addattr_bool(&privtmpl, CKA_SIGN, TRUE);
-	pkcs11_addattr_bool(&privtmpl, CKA_UNWRAP, TRUE);
+	if (!inPrivtmpl) {
+		// default attributes for the private key
+		pkcs11_addattr_bool(&privtmpl, CKA_SENSITIVE, TRUE);
+		pkcs11_addattr_bool(&privtmpl, CKA_DECRYPT, TRUE);
+		pkcs11_addattr_bool(&privtmpl, CKA_SIGN, TRUE);
+		pkcs11_addattr_bool(&privtmpl, CKA_UNWRAP, TRUE);
+	} else {
+		// custom key attributes for the private key
+		pkcs11_addall(&privtmpl, inPrivtmpl);
+	}
 
 	/* call the pkcs11 module to create the key pair */
 	rv = CRYPTOKI_call(ctx, C_GenerateKeyPair(

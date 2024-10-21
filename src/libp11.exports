@@ -33,6 +33,7 @@ PKCS11_init_token
 PKCS11_init_pin
 PKCS11_change_pin
 PKCS11_generate_key
+PKCS11_generate_key_with_attributes
 PKCS11_store_private_key
 PKCS11_store_public_key
 PKCS11_store_certificate
@@ -53,3 +54,4 @@ PKCS11_set_ui_method
 ERR_get_CKR_code
 PKCS11_get_slot_attr_s
 pkcs11_addattr
+pkcs11_addattr_bool
